@@ -2,6 +2,7 @@ const express = require("express")
 const cors = require("cors");
 const app = express();
 const path = require('path');
+const bodyParser = require('body-parser')
 
 
 // ROUTE SETUP-------------------
@@ -12,8 +13,8 @@ const doctorRouter=require('./Routes/doctorRouter')
 // MONGODB SETUP---------------
 const mongoosedb=require('./config/dbconnection')
 mongoosedb.init()
-
-
+app.use('/', express.static(path.join(__dirname, 'public')))    
+app.use(bodyParser.json({limit:"1200kb"}))
 // CORS SETUP----------------
 app.use(
     cors({
@@ -27,9 +28,10 @@ app.use(
 
 
 
-const cookieParser = require("cookie-parser");
-app.use(cookieParser())
+// const cookieParser = require("cookie-parser");
+// app.use(cookieParser())
 app.use(express.json());
+
 
 
 

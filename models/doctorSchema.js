@@ -1,5 +1,4 @@
-const mongoose = require('mongoose')
-
+const mongoose = require("mongoose");
 
 const DoctorSchema = new mongoose.Schema({
   name: {
@@ -8,41 +7,52 @@ const DoctorSchema = new mongoose.Schema({
   },
   phone: {
     type: Number,
-    required: true
+    // required: true
   },
   email: {
     type: String,
-    required: true
+    required: true,
   },
   password: {
     type: String,
-    required: true
+    required: true,
+  },
+  confirmPassword: {
+    type: String,
+    required: true,
   },
   qualification: {
     type: String,
-    required: true
+    // required: true
   },
   department: {
     type: String,
-    required: true
+    // required: true
   },
   consultationFee: {
     type: Number,
-    required: true
+    // required: true
   },
-
-
-
+  document: {
+    type: String,
+  },
+  image: {
+    type: String,
+  },
 
   status: {
     type: String,
-    default: 'Blocked'
+    default: "Blocked",
+  },
+  rejectReason: {
+    type: String,
+    default: "",
   },
   created: {
     type: Date,
     required: true,
-    default: Date.now
-  }
+    default: Date.now,
+  },
 });
 
 module.exports = mongoose.model("Doctor", DoctorSchema);
