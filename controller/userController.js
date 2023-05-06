@@ -2,6 +2,7 @@ const userModel = require("../models/userSchema");
 const bannerModel=require("../models/bannerSchema")
 const doctorModel=require("../models/doctorSchema")
 const departmentModel=require("../models/departmentSchema")
+const planModel=require("../models/planSchema")
 const { sentOtp, verifyOtp } = require("../middleware/twilio");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
@@ -28,7 +29,7 @@ const userAuth=(req,res,next)=>{
               res.json({ status: false, message: "Unauthorized" });
           } else {
        
-              const user = userModel.findById({ _id: decoded.id });
+              const user =await userModel.findById({ _id: decoded.id });
               if (user) {
                   res.json({ status: true, message: "Authorized" });
   
@@ -134,7 +135,7 @@ const doUserLogin=async(req,res,next)=>{
 const getAllBanner=async(req,res,next)=>{
 try{
   let BannerData=await bannerModel.find({status:"ACTIVE"})
-  console.log(BannerData);
+
   res.status(200).json({message:"successfully get Banner",success:true, BannerData})
 }catch{
 
@@ -145,7 +146,7 @@ const getAllDoctor=async(req,res,next)=>{
 try{
 
   let doctorData=await doctorModel.find({status:"Active"})
-  console.log(doctorData,"lllll");
+
   res.status(200).json({message:"successfully get doctors",success:true, doctorData})
 }catch{
 
@@ -155,10 +156,21 @@ try{
 const getAllDepartment=async(req,res,next)=>{
 try{
   let departmentData=await departmentModel.find({status:"ACTIVE"})
-  console.log(departmentData,"lllll");
+
   res.status(200).json({message:"successfully get department",success:true, departmentData})
 }catch{
 
 }
 }
-module.exports = { userAuth,doUserSignup, verifyUserOtp,doUserLogin,getAllBanner,getAllDoctor,getAllDepartment };
+const getAllPlan=async(req,res,next)=>{
+ 
+  try{
+
+    let plans=await planModel.find({status:"ACTIVE"})
+    console.log(plans,"plans");
+    res.status(200).json({message:"successfully get plans",success:true, plans})
+  }catch{
+    res.json({ message: "Something went wrong", success: false })
+  }
+}  
+module.exports = { userAuth,doUserSignup, verifyUserOtp,doUserLogin,getAllBanner,getAllDoctor,getAllDepartment,getAllPlan};

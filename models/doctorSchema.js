@@ -39,6 +39,9 @@ const DoctorSchema = new mongoose.Schema({
   image: {
     type: String,
   },
+  slots: {
+    type: Array,
+  },
 
   status: {
     type: String,
@@ -53,6 +56,7 @@ const DoctorSchema = new mongoose.Schema({
     required: true,
     default: Date.now,
   },
+
 });
 
 module.exports = mongoose.model("Doctor", DoctorSchema);

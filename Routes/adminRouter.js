@@ -14,7 +14,10 @@ const {
   getBannerDetails,
   editBanner,
   deleteBanner,
-  getAllDetails
+  getAllDetails,
+  addPlan,
+  getAllPlans,
+  editPlan
 } = require("../controller/adminController");
 
 router.get("/auth",adminAuth);
@@ -31,4 +34,7 @@ router.get("/getBanner", getBannerDetails);
 router.post("/editBanner",uploadImage.single('image'), editBanner);
 router.put("/deleteBanner/:Id", deleteBanner);
 router.get("/getApprovedDoctor", getAllDetails);
+router.post("/addPlans",uploadImage.single('image'),addPlan);
+router.get("/getPlans", getAllPlans);
+router.post("/editPlans",uploadImage.single('image'),editPlan);
 module.exports = router;

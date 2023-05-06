@@ -1,4 +1,5 @@
 const doctorModel = require("../models/doctorSchema");
+const departmentModel = require("../models/departmentSchema");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { sendEmailOTP } = require("../middleware/nodemailer");
@@ -38,9 +39,14 @@ const doctorAuth = (req, res, next) => {
         if (err) {
           res.json({ status: false, message: "Unauthorized" });
         } else {
-          const admin = doctorModel.findById({ _id: decoded.id });
-          if (admin) {
-            res.json({ status: true, message: "Authorized" });
+          const doctor = await doctorModel.findById({ _id: decoded.id });
+
+          if (doctor) {
+            res.json({
+              status: true,
+              message: "Authorized",
+              doctorData: doctor,
+            });
           } else {
             res.json({ status: false, message: "Admin not exists" });
           }
@@ -197,6 +203,20 @@ const doctorInfo = async (req, res, next) => {
   }
 };
 
+const getDepartment = async (req, res, next) => {
+  try {
+    let departmentData = await departmentModel.find({ status: "ACTIVE" });
+    console.log(departmentData, "lllll");
+    res
+      .status(200)
+      .json({
+        message: "successfully get department",
+        success: true,
+        departmentData,
+      });
+  } catch {}
+};
+
 const getRejReason = async (req, res, next) => {
   try {
     let Id = req.doctorId;
@@ -233,24 +253,75 @@ const editDoctorProfile = async (req, res, next) => {
       { new: true }
     );
     console.log(editedData, "editedData");
-    res
-      .status(200)
-      .json({
-        editedData,
-        success: true,
-        message: "Successfully updated data",
-      });
+    res.status(200).json({
+      editedData,
+      success: true,
+      message: "Successfully updated data",
+    });
   } catch {
-    res.json({ message: "Something went wrong", success: false })
+    res.json({ message: "Something went wrong", success: false });
   }
 };
 
+const docorSelSlots = async (req, res, next) => {
+  try {
+    const _id = req.doctorId;
+    let { selectedTime } = req.body;
+    let editedData = await doctorModel.findByIdAndUpdate(
+      { _id },
+      {
+        $addToSet: { slots: { $each: [...selectedTime] } },
+      },
+      { new: true }
+    );
+    res.status(200).json({
+      editedData,
+      success: true,
+      message: "Successfully Added Your Slots ",
+    });
+  } catch {
+    res.json({ message: "Something went wrong", success: false });
+  }
+};
+
+const scheduledDoctorSlot = async (req, res, next) => {
+  try {
+    console.log("uuuuuuu");
+    const _id = req.doctorId;
+    let doctorSlots = await doctorModel.findById({ _id });
+    let slots = doctorSlots.slots;
+    res.status(200).json({
+      slots,
+      success: true,
+      message: "Successfully get Your Slots ",
+    });
+  } catch {
+    res.json({ message: "Something went wrong", success: false });
+  }
+};
+const getDoctorNavData = async (req, res, next) => {
+  try {
+    const _id = req.doctorId;
+    let doctorProfile = await doctorModel.findById({ _id });
+    res.status(200).json({
+      doctorProfile,
+      success: true,
+      message: "Successfully get Your profile ",
+    });
+  } catch {
+    res.json({ message: "Something went wrong", success: false });
+  }
+};
 module.exports = {
   doctorGetOtp,
   submitOtp,
   doctorLogin,
   doctorInfo,
+  getDepartment,
   getRejReason,
   doctorAuth,
   editDoctorProfile,
+  docorSelSlots,
+  scheduledDoctorSlot,
+  getDoctorNavData,
 };

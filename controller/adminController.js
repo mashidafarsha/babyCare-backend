@@ -1,5 +1,6 @@
 const adminModel = require("../models/adminSchema");
 const departmentModel=require("../models/departmentSchema")
+const planModel=require("../models/planSchema")
 const doctorModel=require("../models/doctorSchema")
 const jwt = require("jsonwebtoken");
 let env = require("dotenv").config();
@@ -26,7 +27,7 @@ const adminAuth=(req,res,next)=>{
               res.json({ status: false, message: "Unauthorized" });
           } else {
        
-              const admin = adminModel.findById({ _id: decoded.id });
+              const admin =await adminModel.findById({ _id: decoded.id });
               if (admin) {
                   res.json({ status: true, message: "Authorized" });
   
@@ -205,7 +206,7 @@ const editBanner=async(req,res,next)=>{
 try{
   console.log("llllll");
  console.log(req.body);
- let image=req.file.path
+ const image = req.file.path.replace("public", "");
 let{bannerName,id,description}=req.body
 let editedbanner= await bannerModel.findByIdAndUpdate({_id:id},
   {$set:{
@@ -241,6 +242,56 @@ const getAllDetails=async(req,res,next)=>{
   }
 }
 
+const addPlan=async(req,res,next)=>{
+
+  try{
+    const image = req.file.path.replace("public", "");
+   console.log("pppp");
+    let {planname,description,amount,offerAmount}=req.body
+    let plans=await planModel.create({
+      planname,
+      description,
+      amount,
+      offerAmount,
+      image
+    })
+
+
+    console.log(plans);
+    res.status(200).json({message:"successfully add new plan",success:true,plans})
+  
+  }catch{
+    res.json({ message: "Something went wrong", success: false })
+  }
+}
+const getAllPlans=async(req,res,next)=>{
+  try{
+    console.log("hhhh");
+    let plans=await planModel.find({status:"ACTIVE"})
+    console.log(plans,"plans");
+    res.status(200).json({message:"successfully get plans",success:true, plans})
+  }catch{
+    res.json({ message: "Something went wrong", success: false })
+  }
+}
+const editPlan=async(req,res,next)=>{
+try{
+  const image = req.file.path.replace("public", "");
+  let{id,planname,description,amount,offerAmount}=req.body
+  let editedplan= await planModel.findByIdAndUpdate({_id:id},
+    {$set:{
+   
+      planname,
+      description,
+      amount,
+      offerAmount,
+      image
+  }},{ new: true })
+  res.status(200).json({message:"successfully edited plan",success:true, editedplan})
+}catch{
+  res.json({ message: "Something went wrong", success: false })
+}
+}
 
 module.exports = {
   adminLogin,
@@ -256,6 +307,9 @@ module.exports = {
   editBanner,
   adminAuth,
   getAllDetails,
-  deleteBanner
+  deleteBanner,
+  addPlan,
+  getAllPlans,
+  editPlan
 
 };
