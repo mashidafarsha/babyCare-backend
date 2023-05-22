@@ -5,7 +5,8 @@ const app = express();
 const path = require('path');
 const bodyParser = require('body-parser')
 const {Server} = require('socket.io');
-// const server = http.createServer(app);
+let env = require("dotenv").config(); 
+
 // ROUTE SETUP-------------------
 const patientRouter = require('./Routes/patientRouter')
 const adminRouter = require('./Routes/adminRouter')
@@ -19,7 +20,7 @@ app.use(bodyParser.json({limit:"1200kb"}))
 // CORS SETUP----------------
 app.use(
     cors({
-        origin:"*",
+        origin:[process.env.CORS_API],
         methods: ["GET", "POST", "DELETE", "PUT"],
         credentials: true,
 
