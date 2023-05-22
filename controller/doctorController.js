@@ -1,8 +1,11 @@
 const doctorModel = require("../models/doctorSchema");
 const departmentModel = require("../models/departmentSchema");
+const slotBookingModel=require("../models/slotBookingSchema")
+const userModel=require('../models/userSchema')
+const planModel=require('../models/planSchema')
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const { sendEmailOTP } = require("../middleware/nodemailer");
+const { sendEmailOTP,sendCancellationEmail } = require("../middleware/nodemailer");
 const nodemailer = require("nodemailer");
 
 function generateToken(id) {
@@ -159,7 +162,8 @@ const doctorLogin = async (req, res, next) => {
 
 const doctorInfo = async (req, res, next) => {
   try {
-    let formData = req.file;
+    const formData = req.file.path.replace("public", "");
+    
     console.log(formData);
     let {
       name,
@@ -178,7 +182,8 @@ const doctorInfo = async (req, res, next) => {
       department,
       experience,
       consultationFee,
-      document: formData.path,
+      rejectReason:"",
+      document: formData,
     });
     const updatedDoctor = await doctorModel.findOneAndUpdate(
       { email },
@@ -234,9 +239,10 @@ const getRejReason = async (req, res, next) => {
 const editDoctorProfile = async (req, res, next) => {
   try {
     console.log(req.body);
+    let Id = req.doctorId;
     const image = req.file.path.replace("public", "");
     console.log(image);
-    let { Id, name, email, phone, qualification, department } = req.body;
+    let { name, email, phone, qualification, department } = req.body;
     console.log(Id, "jjjjj");
     let editedData = await doctorModel.findByIdAndUpdate(
       { _id: Id },
@@ -312,6 +318,98 @@ const getDoctorNavData = async (req, res, next) => {
     res.json({ message: "Something went wrong", success: false });
   }
 };
+
+const displayScheduledSlot=async(req,res,next)=>{
+  try{
+    const _id = req.doctorId;
+    let doctorData = await doctorModel.findById({ _id });
+    let slots=doctorData.slots
+  
+    res.status(200).json({
+      slots,
+      success: true,
+      message: "Successfully get Your profile ",
+    });
+  }catch{
+    res.json({ message: "Something went wrong", success: false });
+  }
+}
+
+const cancelDoctorSchedule=async(req,res,next)=>{
+  try{
+let {startTime}=req.body
+console.log(startTime);
+const doctorId = req.doctorId;
+let doctorData = await doctorModel.findByIdAndUpdate(
+  {_id : doctorId},
+  { $pull: { slots: startTime } }
+);
+
+
+
+const deletedData = await slotBookingModel.findOneAndDelete({
+  DoctorId: doctorId,
+  bookingTime: startTime
+}).populate('UserId')
+
+let email=deletedData.UserId.email
+
+
+const message = "Your Slot has been canceled you can Resheduled another Slot Sorry for the inconvinience"
+sendCancellationEmail(email,message)
+
+res.status(200).json({ message: "Doctor schedule canceled successfully" });
+  }catch{
+    res.status(200).json({ message: "Doctor schedule canceled successfully" });
+  }
+}
+
+const userBookedSlot=async(req,res,next)=>{
+try{
+  const doctorId = req.doctorId;
+  let bookedSlots = await slotBookingModel.find({ DoctorId: doctorId, status: "Active" });
+
+res.status(200).json({
+  bookedSlots,
+  success: true,
+  message: "Successfully get booked Slots ",
+});
+}catch{
+  res.json({ message: "Something went wrong", success: false });
+}
+}
+const getActiveBookingDetails=async(req,res,next)=>{
+  try{
+    const doctorId = req.doctorId;
+    let bookedSlots = await slotBookingModel.find({ DoctorId: doctorId, status: "Active" }).populate('UserId')
+     console.log(bookedSlots);
+    res.status(200).json({
+      bookedSlots,
+      success: true,
+      message: "Successfully get booked Slots ",
+    });
+  }catch{
+    res.json({ message: "Something went wrong", success: false });  
+  }
+}
+const getPlanChatUser=async(req,res,next)=>{
+  try{
+let userData=await planModel.find({status:"ACTIVE"})
+let users = userData.map((data) => data.user);
+
+let flattenedUsers = users.flat()
+console.log(flattenedUsers);
+let UserDetails = await userModel.find({ _id: { $in: flattenedUsers } });
+
+res.status(200).json({
+  UserDetails,
+  success: true,
+  message: "Successfully get booked Slots ",
+});   
+  }catch{
+    res.json({ message: "Something went wrong", success: false });  
+  }
+}
 module.exports = {
   doctorGetOtp,
   submitOtp,
@@ -324,4 +422,9 @@ module.exports = {
   docorSelSlots,
   scheduledDoctorSlot,
   getDoctorNavData,
+  displayScheduledSlot,
+  cancelDoctorSchedule,
+  userBookedSlot,
+  getActiveBookingDetails,
+  getPlanChatUser
 };

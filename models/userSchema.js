@@ -9,18 +9,34 @@ const UserSchema = new mongoose.Schema({
     type:String,
     required:true
 },
+image:{
+  type:String,
+ 
+},
   password:{
     type:String,
     required:true
 },
 cPassword:{
     type:String,
-    required:true
+  
 },
+
 status: {
     type: String,
     default: "Active",
   },
+
+
+  plans:{
+
+    type:Array
+  },
+  planExpDate: {
+    type: Date,
+    required: true,
+  },
+  
 
 created:{
   type:Date,

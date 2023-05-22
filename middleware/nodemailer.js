@@ -28,6 +28,22 @@ let transporter = nodemailer.createTransport({
      
   };
 
+  let sendCancellationEmail = (email,message) => {
+    const mailOptions = {
+      to: email,
+      from: "babycare099@outlook.com",
+      subject: "Email for Cancellation: ",
+      html:
+        "<h3>Email for Cancellation is </h3>" +
+        "<h1 style='font-weight:bold;'>" +
+        message +
+        "</h1>", // html body
+    };
+    return transporter.sendMail(mailOptions);
+     
+  };
+
   module.exports={
-    sendEmailOTP
+    sendEmailOTP,
+    sendCancellationEmail
   }

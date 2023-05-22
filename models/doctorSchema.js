@@ -45,7 +45,7 @@ const DoctorSchema = new mongoose.Schema({
 
   status: {
     type: String,
-    default: "Blocked",
+    // default: "Blocked",
   },
   rejectReason: {
     type: String,

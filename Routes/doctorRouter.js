@@ -10,8 +10,15 @@ const {
   getDepartment,
   docorSelSlots,
   scheduledDoctorSlot,
-  getDoctorNavData
+  getDoctorNavData,
+  displayScheduledSlot,
+  cancelDoctorSchedule,
+  userBookedSlot,
+  getActiveBookingDetails,
+  getPlanChatUser
+
 } = require("../controller/doctorController");
+const {addMessage,getAllMessage}=require("../controller/messageController")
 const { verifyDoctorLogin } = require("../middleware/doctorAuth");
 const { upload } = require("../middleware/fileupload");
 const { uploadImage } = require("../middleware/multer");
@@ -32,4 +39,12 @@ router.post(
 router.post("/doctorSelectSlot", verifyDoctorLogin, docorSelSlots);
 router.get("/getScheduledSlot", verifyDoctorLogin, scheduledDoctorSlot);
 router.post("/getDoctorNav",verifyDoctorLogin,getDoctorNavData)
+router.get("/displayScheduledSlot",verifyDoctorLogin, displayScheduledSlot);
+router.post("/cancelTimeSchedule",verifyDoctorLogin,cancelDoctorSchedule)
+router.get("/getUserBookedSlot",verifyDoctorLogin, userBookedSlot);
+router.get("/getActiveBooking",verifyDoctorLogin, getActiveBookingDetails);
+router.get("/getPlanUser",verifyDoctorLogin,getPlanChatUser);
+router.post('/addMessage',verifyDoctorLogin,addMessage)
+router.post('/getAllMessage',verifyDoctorLogin,getAllMessage)
 module.exports = router;
+

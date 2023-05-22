@@ -2,6 +2,8 @@ const adminModel = require("../models/adminSchema");
 const departmentModel=require("../models/departmentSchema")
 const planModel=require("../models/planSchema")
 const doctorModel=require("../models/doctorSchema")
+const userModel=require("../models/userSchema")
+const slotBookingModel=require("../models/slotBookingSchema")
 const jwt = require("jsonwebtoken");
 let env = require("dotenv").config();
 const bcrypt = require("bcrypt");
@@ -12,6 +14,22 @@ function generateToken(id) {
   const token = jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: "1h" });
   return token;
 }
+
+const handleError = (err) => {
+  let errors = { message: "" };
+
+  if (err.code === 11000) {
+    errors.message = "the Item is already exists";
+    return errors;
+  }
+
+  if (err.message.includes("user validation failed")) {
+    Object.values(err.errors).forEach((properties) => {
+      errors[properties.path] = properties.message;
+    });
+    return errors;
+  }
+};
 
 const adminAuth=(req,res,next)=>{
   try{
@@ -29,7 +47,7 @@ const adminAuth=(req,res,next)=>{
        
               const admin =await adminModel.findById({ _id: decoded.id });
               if (admin) {
-                  res.json({ status: true, message: "Authorized" });
+                  res.json({ status: true, message: "Authorized",adminData:admin });
   
               } else {
                   res.json({ status: false, message: "Admin not exists" })
@@ -79,22 +97,19 @@ const adminLogin = async (req, res, next) => {
 const addCategory=async(req,res,next)=>{
   try{
     console.log('hyyy');
+    const image = req.file.path.replace("public", "");
     let {categoryName,description}=req.body
     let department =await departmentModel.create({
       categoryName,
       description,
+      image
       
     });
     console.log(department);
   res.status(200).json({message:"successfully add new category",success:true,department})
 
   }catch(err){
-    let errors = { name: ""};
-
-  if (err.code === 11000) {
-    errors.name = "category is already exists";
-    
-  }
+    const errors = handleError(err);
 res.json({message:"something wrong",success:false,errors})
   }
 }
@@ -124,13 +139,14 @@ const deleteCategory =async(req,res,next)=>{
  
   
 }
-const editCategory=(req,res,next)=>{
+const editCategory=async(req,res,next)=>{
 try{
+  const image = req.file.path.replace("public", "");
 const{id,categoryName,description}=req.body
-departmentModel.findByIdAndUpdate({_id:id},{$set:{categoryName,description}}).then((response)=>{
-  res.status(200).json({message:"Updated Successful",success:true})
-})
-}catch{
+let editDep=await departmentModel.findByIdAndUpdate({_id:id},{$set:{categoryName,description,image}},{ new: true })
+res.status(200).json({message:"successfully edit Department",success:true, editDep})
+}catch(err){
+  console.log(err);
   res.json({ message: "Something went wrong", status: false })
 }
  
@@ -188,7 +204,8 @@ const addBanner=async(req,res,next)=>{
 
   }catch (err){
 console.log(err);
-res.json({ message: "Something went wrong", status: false })
+const errors = handleError(err);
+res.json({ message: "Something went wrong", status: false,errors })
   }
  
 }
@@ -215,9 +232,10 @@ let editedbanner= await bannerModel.findByIdAndUpdate({_id:id},
   image
 
 }},{ new: true })
-
-}catch{
-
+res.status(200).json({message:"successfully edit Banner",success:true, editedbanner})
+}catch(err){
+  console.log(err);
+  res.json({ message: "Something went wrong", status: false, })
 }
 }
 
@@ -232,9 +250,9 @@ const deleteBanner=(req,res,next)=>{
   }
 }
 
-const getAllDetails=async(req,res,next)=>{
+const getAllDoctorDetails=async(req,res,next)=>{
   try{
-    let doctors=await doctorModel.find({status:"Active"})
+    let doctors=await doctorModel.find({status:{ $ne: "cancel" } })
     console.log(doctors);
     res.status(200).json({message:"successfully get doctors",success:true,doctors})
   }catch{
@@ -242,13 +260,25 @@ const getAllDetails=async(req,res,next)=>{
   }
 }
 
+const getAllUserData=async(req,res,next)=>{
+try{
+let user=await userModel.find({status:"Active"})
+console.log(user,"user");
+res.status(200).json({message:"successfully get doctors",success:true,user})
+}catch{
+  res.json({ message: "Something went wrong", success: false })
+}
+}
+
 const addPlan=async(req,res,next)=>{
 
   try{
-    const image = req.file.path.replace("public", "");
+  
+    const image = req.file.path.replace("public", "")
+    console.log(image);
    console.log("pppp");
     let {planname,description,amount,offerAmount}=req.body
-    let plans=await planModel.create({
+    let plans = await planModel.create({
       planname,
       description,
       amount,
@@ -257,7 +287,7 @@ const addPlan=async(req,res,next)=>{
     })
 
 
-    console.log(plans);
+   
     res.status(200).json({message:"successfully add new plan",success:true,plans})
   
   }catch{
@@ -293,6 +323,46 @@ try{
 }
 }
 
+const deletePlans=(req,res,next)=>{
+  try{
+    console.log("llll");
+    let PlanId=req.params.Id
+    planModel.findOneAndUpdate({_id:PlanId},{$set:{status:"Blocked"}},{ new: true }).then((response)=>{
+      res.status(200).json({message:"Deleted Successful",success:true})
+    })
+  }catch{
+    res.json({ message: "Something went wrong", status: false })
+  }
+}
+
+const blockDoctors=async(req,res,next)=>{
+  try{
+    console.log("llll");
+    let doctorId=req.params.Id
+
+    let doctor=await doctorModel.findById(doctorId)
+    const newStatus = doctor.status === "Active" ? "Block" : "Active";
+    
+    doctorModel.findOneAndUpdate({_id:doctorId},{$set:{status:newStatus}},{ new: true }).then((response)=>{
+      res.status(200).json({message:"Blocked Successful",success:true})
+    })
+
+  }catch{
+    res.json({ message: "Something went wrong", status: false })
+  }
+}
+
+const  AllBookingDetails=async(req,res,next)=>{
+ try{
+  let bookingData=await slotBookingModel.find().populate('UserId').sort({ bookingTime: -1 });
+  console.log(bookingData);
+  res.status(200).json({message:"successfully get all bookings",success:true,bookingData})
+}catch{
+  res.json({ message: "Something went wrong", status: false })
+}
+ }
+
+
 module.exports = {
   adminLogin,
   addCategory,
@@ -306,10 +376,13 @@ module.exports = {
   getBannerDetails,
   editBanner,
   adminAuth,
-  getAllDetails,
+  getAllDoctorDetails,
+  getAllUserData,
   deleteBanner,
   addPlan,
   getAllPlans,
-  editPlan
-
+  editPlan,
+  deletePlans,
+  blockDoctors,
+  AllBookingDetails
 };

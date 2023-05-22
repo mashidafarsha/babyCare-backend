@@ -16,11 +16,11 @@ const PlanSchema = new mongoose.Schema({
       required:true
   },
   amount:{
-    type:String,
+    type:Number,
     required:true
 },
 offerAmount:{
-    type:String,
+    type:Number,
    
 },
   created:{
@@ -32,6 +32,10 @@ offerAmount:{
     type:String,
     default:"ACTIVE"
 },
+user:{
+  type:Array,
+  ref:"User"
+}
 
 })
 module.exports = mongoose.model("Plans", PlanSchema);
