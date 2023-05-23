@@ -322,6 +322,7 @@ const getUserPlanDetails = async (req, res, next) => {
 };
 
 const SlotBookingRazorpay = async (req, res, next) => {
+  console.log("hi");
   try {
     let { totalAmount } = req.body;
     let datas = await RazorpayPayment(totalAmount);
@@ -478,7 +479,7 @@ const checkUserAnyPlan = async (req, res, next) => {
     if (planExists.length > 0) {
       res.status(200).json({
         success: true,
-        message: "Successfully get booked Slots ",
+        message: "Successfully get  Slots ",
       });
     } else {
       res.json({ message: "Something went wrong", success: false });

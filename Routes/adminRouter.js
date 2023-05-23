@@ -21,7 +21,8 @@ const {
   editPlan,
   deletePlans,
   blockDoctors,
-  AllBookingDetails
+  AllBookingDetails,
+  AllBookingDataForChart
 } = require("../controller/adminController");
 
 router.get("/auth",adminAuth);
@@ -45,5 +46,6 @@ router.post("/editPlans",uploadImage.single('image'),editPlan);
 router.put("/deletePlan/:Id", deletePlans);
 router.put("/blockDoctor/:Id", blockDoctors);
 router.get("/getAllBookingData", AllBookingDetails);
+router.get("/getChartBookingData", AllBookingDataForChart);
 module.exports = router;
 

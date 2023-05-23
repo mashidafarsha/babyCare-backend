@@ -355,12 +355,33 @@ const blockDoctors=async(req,res,next)=>{
 const  AllBookingDetails=async(req,res,next)=>{
  try{
   let bookingData=await slotBookingModel.find().populate('UserId').sort({ bookingTime: -1 });
-  console.log(bookingData);
+  // console.log(bookingData);
   res.status(200).json({message:"successfully get all bookings",success:true,bookingData})
 }catch{
   res.json({ message: "Something went wrong", status: false })
 }
  }
+
+ const  AllBookingDataForChart=async(req,res,next)=>{
+  try{
+    const currentDate = new Date();
+    const startOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+    const endOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+   let activeBooking=await slotBookingModel.countDocuments({
+    status: "Active",
+    created: { $gte: startOfMonth, $lte: endOfMonth }
+  });
+  let cancelBooking=await slotBookingModel.countDocuments({
+    status: "Cancel",
+    created: { $gte: startOfMonth, $lte: endOfMonth }
+  });
+   
+   res.status(200).json({message:"successfully get all bookings",success:true,cancelBooking,activeBooking})
+ }catch{
+   res.json({ message: "Something went wrong", status: false })
+ }
+  }
+
 
 
 module.exports = {
@@ -384,5 +405,6 @@ module.exports = {
   editPlan,
   deletePlans,
   blockDoctors,
-  AllBookingDetails
+  AllBookingDetails,
+  AllBookingDataForChart
 };
