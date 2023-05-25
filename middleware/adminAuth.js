@@ -3,7 +3,7 @@ let env=require('dotenv').config()
 const jwt = require("jsonwebtoken");
 let jwt_secret=process.env.JWT_SECRET;
 
-const verifyDoctorLogin=(req,res,next)=>{
+const verifyAdminLogin=(req,res,next)=>{
     try{
         const authHeader = req.headers.authorization;
         if (authHeader) {
@@ -31,4 +31,4 @@ const verifyDoctorLogin=(req,res,next)=>{
         res.status(401).json({ message: "Not authorized" });
     }
 }
-module.exports = { verifyDoctorLogin }
+module.exports = { verifyAdminLogin }

@@ -1,5 +1,6 @@
 const router = require("express").Router();
 const {uploadImage}=require("../middleware/multer")
+const {verifyAdminLogin}=require("../middleware/adminAuth")
 const {
   adminAuth,
   adminLogin,
@@ -27,25 +28,25 @@ const {
 
 router.get("/auth",adminAuth);
 router.post("/adminLogin", adminLogin);
-router.post("/addCategory",uploadImage.single('Image'), addCategory);
-router.get("/category", getAllCategory);
-router.put("/deleteCategory/:Id", deleteCategory);
-router.post("/editCategory",uploadImage.single('image'),  editCategory);
-router.get("/getDoctor", getDoctorDetails);
-router.post("/acceptDoctor/:id", acceptDoctor);
-router.post("/rejectDoctor", rejectDoctor);
-router.post("/addBanner",uploadImage.single('Image'),addBanner);
-router.get("/getBanner", getBannerDetails);
-router.post("/editBanner",uploadImage.single('image'), editBanner);
-router.put("/deleteBanner/:Id", deleteBanner);
-router.get("/getApprovedDoctor", getAllDoctorDetails);
-router.get("/getAllUser", getAllUserData);
-router.post("/addPlans",uploadImage.single('image'),addPlan);
-router.get("/getPlans", getAllPlans);
-router.post("/editPlans",uploadImage.single('image'),editPlan);
-router.put("/deletePlan/:Id", deletePlans);
-router.put("/blockDoctor/:Id", blockDoctors);
-router.get("/getAllBookingData", AllBookingDetails);
-router.get("/getChartBookingData", AllBookingDataForChart);
+router.post("/addCategory",verifyAdminLogin,uploadImage.single('Image'), addCategory);
+router.get("/category",verifyAdminLogin, getAllCategory);
+router.put("/deleteCategory/:Id",verifyAdminLogin, deleteCategory);
+router.post("/editCategory",verifyAdminLogin,uploadImage.single('image'),  editCategory);
+router.get("/getDoctor",verifyAdminLogin, getDoctorDetails);
+router.post("/acceptDoctor/:id",verifyAdminLogin, acceptDoctor);
+router.post("/rejectDoctor",verifyAdminLogin, rejectDoctor);
+router.post("/addBanner",verifyAdminLogin,uploadImage.single('Image'),addBanner);
+router.get("/getBanner",verifyAdminLogin, getBannerDetails);
+router.post("/editBanner",verifyAdminLogin,uploadImage.single('image'), editBanner);
+router.put("/deleteBanner/:Id",verifyAdminLogin, deleteBanner);
+router.get("/getApprovedDoctor",verifyAdminLogin, getAllDoctorDetails);
+router.get("/getAllUser",verifyAdminLogin, getAllUserData);
+router.post("/addPlans",verifyAdminLogin,uploadImage.single('image'),addPlan);
+router.get("/getPlans",verifyAdminLogin, getAllPlans);
+router.post("/editPlans",verifyAdminLogin,uploadImage.single('image'),editPlan);
+router.put("/deletePlan/:Id",verifyAdminLogin, deletePlans);
+router.put("/blockDoctor/:Id",verifyAdminLogin, blockDoctors);
+router.get("/getAllBookingData",verifyAdminLogin, AllBookingDetails);
+router.get("/getChartBookingData",verifyAdminLogin, AllBookingDataForChart);
 module.exports = router;
 
