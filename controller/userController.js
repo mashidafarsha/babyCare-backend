@@ -321,17 +321,32 @@ const getUserPlanDetails = async (req, res, next) => {
   }
 };
 
+// Backend Controller
 const SlotBookingRazorpay = async (req, res, next) => {
-  console.log("hi");
+  console.log("Backend hit! Data received:", req.body); 
   try {
-    let { totalAmount } = req.body;
-    let datas = await RazorpayPayment(totalAmount);
-    console.log(datas);
-    res
-      .status(200)
-      .json({ message: "successfully get data", success: true, datas });
-  } catch {
-    res.json({ message: "Something went wrong", success: false });
+    const { totalAmount } = req.body;
+
+    if (!totalAmount) {
+      return res.status(400).json({ success: false, message: "Amount is missing" });
+    }
+
+    // Amount paise-lekku maattuka (100 * totalAmount)
+    const amountInPaise = Math.round(totalAmount * 100);
+
+    // RazorpayPayment function-il ee amount pass cheyyuka
+    const datas = await RazorpayPayment(amountInPaise); 
+    
+    console.log("Razorpay Order Created:", datas);
+
+    res.status(200).json({ 
+      message: "Successfully created Razorpay order", 
+      success: true, 
+      datas 
+    });
+  } catch (error) {
+    console.error("Razorpay Server Error:", error);
+    res.status(500).json({ message: "Razorpay Order Creation Failed", success: false });
   }
 };
 
