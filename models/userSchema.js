@@ -34,7 +34,7 @@ status: {
   },
   planExpDate: {
     type: Date,
-    required: true,
+    required: false,
   },
   
 

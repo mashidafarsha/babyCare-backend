@@ -20,13 +20,22 @@ const {
   getUserProfile,
   editUserProfile,
   getAlreadyBookedSlots,
-  checkUserAnyPlan
- 
+  checkUserAnyPlan,
+  getQueueStatus
 } = require("../controller/userController");
 
 const {addMessage,getAllMessage}=require("../controller/messageController")
+const { addReview } = require("../controller/reviewController");
+const { triggerSOS } = require("../controller/sosController");
 const { uploadImage } = require("../middleware/multer");
 const { verifyUserLogin } = require("../middleware/userAuth");
+const { uploadRecord } = require("../middleware/recordUpload");
+const {
+  uploadMedicalRecord,
+  getMedicalRecords,
+  getUserPrescriptions
+} = require("../controller/ehrController");
+
 router.get("/auth", userAuth);
 router.post("/userSignup", doUserSignup);
 router.post("/userOtpSubmit", verifyUserOtp);
@@ -51,7 +60,12 @@ router.post('/addMessage',verifyUserLogin,addMessage)
 router.post('/getAllMessage',verifyUserLogin,getAllMessage)
 router.get("/checkUserPlan",verifyUserLogin,checkUserAnyPlan);
 
-
+// EHR Routes
+router.post("/uploadMedicalRecord", verifyUserLogin, uploadRecord.single("file"), uploadMedicalRecord);
+router.get("/getMedicalRecords", verifyUserLogin, getMedicalRecords);
+router.get("/getPrescriptions", verifyUserLogin, getUserPrescriptions);
+router.get("/getQueueStatus/:bookingId", verifyUserLogin, getQueueStatus);
+router.post("/addReview", verifyUserLogin, addReview);
+router.post("/triggerSOS", verifyUserLogin, triggerSOS);
 
 module.exports = router;
-

@@ -66,38 +66,32 @@ const doctorGetOtp = async (req, res, next) => {
     const doctor = await doctorModel.findOne({ email });
     console.log(doctor, "doctor");
     if (!doctor) {
-      signupData = {
+      let newpassword = await bcrypt.hash(password, 10);
+
+      let newDoctor = await doctorModel.create({
         name,
         email,
-        password,
+        password: newpassword,
         confirmPassword,
-      };
-      const otpEmail = Math.floor(1000 + Math.random() * 9000);
-      console.log(otpEmail, "8");
-      emailOtp = otpEmail;
+      });
 
-      sendEmailOTP(email, otpEmail)
-        .then((info) => {
-          console.log(`Message sent: ${info.messageId}`);
-          console.log(`Preview URL: ${nodemailer.getTestMessageUrl(info)}`);
-        })
-        .catch((error) => {
-          throw error;
-        });
       res.status(200).json({
-        message: "OTP is send to given email and phone number",
-        otpSend: true,
+        message: "Successfully registered",
+        doctor: newDoctor,
+        created: true,
+        otpSend: false,
       });
     } else {
       res.status(200).json({
         message: "There is already a doctor with same email",
         otpSend: false,
+        created: false
       });
     }
   } catch (error) {
     console.log(error);
     const errors = handleError(error);
-    res.status(400).json({ errors, otpSend: false });
+    res.status(400).json({ errors, otpSend: false, created: false });
   }
 };
 
@@ -133,7 +127,8 @@ const submitOtp = async (req, res, next) => {
 
 const doctorLogin = async (req, res, next) => {
   try {
-    let { email, password } = req.body;
+    let { password } = req.body;
+    let email = req.body.email?.toLowerCase().trim();
     let doctor = await doctorModel.findOne({ email });
     console.log(doctor, "pp");
     if (doctor) {
@@ -406,10 +401,22 @@ res.status(200).json({
   success: true,
   message: "Successfully get booked Slots ",
 });   
-  }catch{
+  } catch {
     res.json({ message: "Something went wrong", success: false });  
   }
 }
+
+const completeBooking = async (req, res) => {
+  try {
+    const { bookingId } = req.params;
+    await slotBookingModel.findByIdAndUpdate(bookingId, { status: "Completed" });
+    res.status(200).json({ success: true, message: "Appointment marked as completed" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
 module.exports = {
   doctorGetOtp,
   submitOtp,
@@ -426,5 +433,6 @@ module.exports = {
   cancelDoctorSchedule,
   userBookedSlot,
   getActiveBookingDetails,
-  getPlanChatUser
+  getPlanChatUser,
+  completeBooking
 };

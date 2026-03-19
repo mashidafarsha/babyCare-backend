@@ -66,7 +66,8 @@ const adminAuth=(req,res,next)=>{
 
 const adminLogin = async (req, res, next) => {
   try {
-    let { email, password } = req.body;
+    let email = req.body.email?.toLowerCase().trim();
+    let { password } = req.body;
     console.log(email, password);
     let admin = await adminModel.findOne({ email });
 
