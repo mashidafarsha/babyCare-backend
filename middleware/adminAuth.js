@@ -1,7 +1,6 @@
 const adminModel=require("../models/adminSchema")
-let env=require('dotenv').config()
+require('dotenv').config();
 const jwt = require("jsonwebtoken");
-let jwt_secret=process.env.JWT_SECRET;
 
 const verifyAdminLogin=(req,res,next)=>{
     try{
@@ -9,18 +8,25 @@ const verifyAdminLogin=(req,res,next)=>{
         if (authHeader) {
             const token = authHeader.split(' ')[1];
 
-            jwt.verify(token, jwt_secret, async (err, decoded) => {
+            const secret = process.env.JWT_SECRET || "thisismysecret";
+            jwt.verify(token, secret, async (err, decoded) => {
                
                 if (err) {
+                    console.error("verifyAdminLogin JWT Error:", err.message);
                     res.json({ status: false, message: "Permission not allowed" });
                 } else {
-                    const admin =await adminModel.findOne({ _id:decoded.id})
-                    if (admin) {
-                        req.adminId = admin._id
-                         next()
-                    } else {
-                        console.log("err");
-                        res.json({ status: false, message: "Admin not exists" });
+                    try {
+                        const admin = await adminModel.findOne({ _id: decoded.id });
+                        if (admin) {
+                            req.adminId = admin._id;
+                            next();
+                        } else {
+                            console.error("verifyAdminLogin Admin not found for ID:", decoded.id);
+                            res.json({ status: false, message: "Admin not exists" });
+                        }
+                    } catch (dbErr) {
+                        console.error("verifyAdminLogin Database Error:", dbErr.message);
+                        res.json({ status: false, message: "Database Error" });
                     }
                 }
             });
