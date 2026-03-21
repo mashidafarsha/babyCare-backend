@@ -11,7 +11,8 @@ const bannerModel=require("../models/bannerSchema")
 
 
 function generateToken(id) {
-  const token = jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: "1h" });
+  const secret = process.env.JWT_SECRET || "thisismysecret";
+  const token = jwt.sign({ id }, secret, { expiresIn: "1h" });
   return token;
 }
 
@@ -31,38 +32,40 @@ const handleError = (err) => {
   }
 };
 
-const adminAuth=(req,res,next)=>{
-  try{
+const adminAuth = (req, res, next) => {
+  try {
     const authHeader = req.headers.authorization;
-    console.log(authHeader,"llll");
+    const secret = process.env.JWT_SECRET || "thisismysecret";
+    
     if (authHeader) {
-      console.log("hello");
       const token = authHeader.split(' ')[1];
-      jwt.verify(token, process.env.JWT_SECRET, async (err, decoded) => {
-           
-          if (err) {
-      
-              res.json({ status: false, message: "Unauthorized" });
-          } else {
-       
-              const admin =await adminModel.findById({ _id: decoded.id });
-              if (admin) {
-                  res.json({ status: true, message: "Authorized",adminData:admin });
-  
-              } else {
-                  res.json({ status: false, message: "Admin not exists" })
-              }
+      jwt.verify(token, secret, async (err, decoded) => {
+        if (err) {
+          console.error("JWT Verification Error:", err.message);
+          res.json({ status: false, message: "Unauthorized" });
+        } else {
+          try {
+            const admin = await adminModel.findById(decoded.id);
+            if (admin) {
+              res.json({ status: true, message: "Authorized", adminData: admin });
+            } else {
+              console.error("Admin not found for ID:", decoded.id);
+              res.json({ status: false, message: "Admin not exists" });
+            }
+          } catch (dbErr) {
+            console.error("Database Error in adminAuth:", dbErr.message);
+            res.json({ status: false, message: "Database Error" });
           }
+        }
       });
-  } else {
-      res.json({ status: false, message: 'Token not provided' })
+    } else {
+      res.json({ status: false, message: 'Token not provided' });
+    }
+  } catch (err) {
+    console.error("Catch Error in adminAuth:", err.message);
+    res.json({ status: false, message: 'Server Error' });
   }
-  }catch(err){
-    res.json({ status: false, message: 'Token not provided' })
-  }
-  
-
-}
+};
 
 const adminLogin = async (req, res, next) => {
   try {
