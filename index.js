@@ -19,7 +19,7 @@ mongoosedb.init();
 // CORS SETUP (Ithu routes-inu munnil undayirikkanam)
 app.use(
     cors({
-        origin: ["http://localhost:5173", "http://localhost:5174", process.env.CORS_API],
+        origin: ["http://localhost:5173", "http://localhost:5174", "http://localhost:5175", "https://truecare.netlify.app", process.env.CORS_API],
         methods: ["GET", "POST", "DELETE", "PUT", "PATCH", "OPTIONS"],
         credentials: true,
     })
@@ -43,7 +43,7 @@ const server = http.createServer(app);
 const io = new Server(server, {
     pingTimeout: 60000,
     cors: {
-        origin: ["http://localhost:5173", "http://localhost:5174", process.env.CORS_API],
+        origin: ["http://localhost:5173", "http://localhost:5174", "http://localhost:5175", "https://truecare.netlify.app", process.env.CORS_API],
         methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
         credentials: true
     }

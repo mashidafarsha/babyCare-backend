@@ -61,7 +61,8 @@ const doctorAuth = (req, res, next) => {
 
 const doctorGetOtp = async (req, res, next) => {
   try {
-    let { name, email, password, confirmPassword } = req.body;
+    let email = req.body.email?.toLowerCase().trim();
+    let { name, password, confirmPassword } = req.body;
 
     const doctor = await doctorModel.findOne({ email });
     console.log(doctor, "doctor");

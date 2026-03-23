@@ -48,7 +48,8 @@ const userAuth = (req, res, next) => {
 
 const doUserSignup = async (req, res, next) => {
   try {
-    let { name, email, phone, password, cPassword } = req.body;
+    let email = req.body.email?.toLowerCase().trim();
+    let { name, phone, password, cPassword } = req.body;
     let user = await userModel.findOne({ phone });
     if (user) {
       res.json({ success: false, message: "Already Registered" });
