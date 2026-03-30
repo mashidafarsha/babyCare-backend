@@ -359,9 +359,47 @@ const getUserProfile = async (req, res, next) => {
   try {
     let userId = req.userId;
     let user = await userModel.findById({ _id: userId });
-    res.status(200).json({ message: "successfully get the user", success: true, user });
+    
+    // Count real visits from slot bookings
+    const visitCount = await slotBookingModel.countDocuments({ UserId: userId, status: "Active" });
+    
+    res.status(200).json({ 
+      message: "successfully get the user", 
+      success: true, 
+      user,
+      visitCount 
+    });
   } catch {
     res.json({ message: "Something went wrong", success: false });
+  }
+};
+
+const updateHealthStats = async (req, res, next) => {
+  try {
+    const userId = req.userId;
+    const { bloodPressure, heartRate, bloodSugar, weight, height } = req.body;
+    
+    const updatedUser = await userModel.findByIdAndUpdate(
+      { _id: userId },
+      { 
+        $set: { 
+          "healthProfile.bloodPressure": bloodPressure,
+          "healthProfile.heartRate": heartRate,
+          "healthProfile.bloodSugar": bloodSugar,
+          "healthProfile.weight": weight,
+          "healthProfile.height": height
+        } 
+      },
+      { new: true }
+    );
+    
+    res.status(200).json({ 
+      success: true, 
+      message: "Health stats updated successfully", 
+      user: updatedUser 
+    });
+  } catch (error) {
+    res.json({ success: false, message: "Error updating health stats" });
   }
 };
 
@@ -424,6 +462,7 @@ module.exports = {
   cancelUserBooking,
   getUserProfile,
   editUserProfile,
+  updateHealthStats,
   getAlreadyBookedSlots,
   checkUserAnyPlan,
   getQueueStatus

@@ -38,6 +38,13 @@ status: {
     type: Date,
     required: false,
   },
+  healthProfile: {
+    bloodPressure: { type: String, default: "120/80" },
+    heartRate: { type: Number, default: 72 },
+    bloodSugar: { type: Number, default: 90 },
+    weight: { type: Number, default: 70 },
+    height: { type: Number, default: 170 },
+  },
   
 
 created:{

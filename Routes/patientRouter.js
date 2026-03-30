@@ -19,6 +19,7 @@ const {
   cancelUserBooking,
   getUserProfile,
   editUserProfile,
+  updateHealthStats,
   getAlreadyBookedSlots,
   checkUserAnyPlan,
   getQueueStatus
@@ -58,6 +59,7 @@ router.post( "/editUser", verifyUserLogin,  uploadImage.single("Image"), editUse
 router.get("/getUserBookedSlot/:Id",verifyUserLogin,getAlreadyBookedSlots);
 router.post('/addMessage',verifyUserLogin,addMessage)
 router.post('/getAllMessage',verifyUserLogin,getAllMessage)
+router.post("/updateHealthStats", verifyUserLogin, updateHealthStats);
 router.get("/checkUserPlan",verifyUserLogin,checkUserAnyPlan);
 
 // EHR Routes
