@@ -17,8 +17,8 @@ totalAmount:{
 },
 DoctorId:{
     type: mongoose.Schema.Types.ObjectId,
-    require:true
-  
+    require:true,
+    ref:"Doctor"
 },
 DoctorName:{
     type:String,
@@ -32,6 +32,10 @@ UserId:{
     type: mongoose.Schema.Types.ObjectId,
     require:true,
     ref:"User"
+},
+prescription:{
+    type:String,
+    default:""
 },
 
 

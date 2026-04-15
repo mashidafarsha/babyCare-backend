@@ -101,7 +101,7 @@ const adminLogin = async (req, res, next) => {
 const addCategory=async(req,res,next)=>{
   try{
     console.log('hyyy');
-    const image = req.file.path.replace("public", "");
+    const image = req.file.path;
     let {categoryName,description}=req.body
     let department =await departmentModel.create({
       categoryName,
@@ -145,7 +145,7 @@ const deleteCategory =async(req,res,next)=>{
 }
 const editCategory=async(req,res,next)=>{
 try{
-  const image = req.file.path.replace("public", "");
+  const image = req.file.path;
 const{id,categoryName,description}=req.body
 let editDep=await departmentModel.findByIdAndUpdate({_id:id},{$set:{categoryName,description,image}},{ new: true })
 res.status(200).json({message:"successfully edit Department",success:true, editDep})
@@ -193,7 +193,7 @@ res.status(200).json({message:"successfully rejected",success:true,doctor})
 
 const addBanner=async(req,res,next)=>{
   try{
-    const image = req.file.path.replace("public", "");
+    const image = req.file.path;
    
     let {bannerName,description}=req.body
     console.log(bannerName,"pppp");
@@ -227,7 +227,7 @@ const editBanner=async(req,res,next)=>{
 try{
   console.log("llllll");
  console.log(req.body);
- const image = req.file.path.replace("public", "");
+  const image = req.file.path;
 let{bannerName,id,description}=req.body
 let editedbanner= await bannerModel.findByIdAndUpdate({_id:id},
   {$set:{
@@ -278,7 +278,7 @@ const addPlan=async(req,res,next)=>{
 
   try{
   
-    const image = req.file.path.replace("public", "")
+    const image = req.file.path;
     console.log(image);
    console.log("pppp");
     let {planname,description,amount,offerAmount}=req.body
@@ -310,7 +310,7 @@ const getAllPlans=async(req,res,next)=>{
 }
 const editPlan=async(req,res,next)=>{
 try{
-  const image = req.file.path.replace("public", "");
+  const image = req.file.path;
   let{id,planname,description,amount,offerAmount}=req.body
   let editedplan= await planModel.findByIdAndUpdate({_id:id},
     {$set:{

@@ -158,7 +158,7 @@ const doctorLogin = async (req, res, next) => {
 
 const doctorInfo = async (req, res, next) => {
   try {
-    const formData = req.file.path.replace("public", "");
+    const formData = req.file.path;
     
     console.log(formData);
     let {
@@ -234,34 +234,49 @@ const getRejReason = async (req, res, next) => {
 
 const editDoctorProfile = async (req, res, next) => {
   try {
-    console.log(req.body);
     let Id = req.doctorId;
-    const image = req.file.path.replace("public", "");
-    console.log(image);
-    let { name, email, phone, qualification, department } = req.body;
-    console.log(Id, "jjjjj");
-    let editedData = await doctorModel.findByIdAndUpdate(
-      { _id: Id },
-      {
-        $set: {
-          name,
-          email,
-          phone,
-          qualification,
-          department,
-          image,
-        },
-      },
+    const { name, email, phone, qualification, department, experience, about, address, consultationFee } = req.body;
+    
+    const updateData = {
+      name,
+      email,
+      phone,
+      qualification,
+      department,
+      experience,
+      about,
+      address,
+      consultationFee: Number(consultationFee) || 0
+    };
+
+    if (req.file) {
+      updateData.image = req.file.path;
+    }
+
+    console.log("Updating Doctor:", Id, "Data:", updateData);
+
+    const editedData = await doctorModel.findByIdAndUpdate(
+      Id,
+      { $set: updateData },
       { new: true }
     );
-    console.log(editedData, "editedData");
+    
+    if (!editedData) {
+      return res.status(404).json({ success: false, message: "Doctor record not found" });
+    }
+
     res.status(200).json({
       editedData,
       success: true,
-      message: "Successfully updated data",
+      message: "Successfully synchronized professional profile",
+      doctorData: editedData // Ensuring consistency in naming if needed
     });
-  } catch {
-    res.json({ message: "Something went wrong", success: false });
+  } catch (error) {
+    console.error("CRITICAL Sync Error:", error);
+    res.json({ 
+      message: "Sync Failed: Database synchronization error. Please check all fields.", 
+      success: false 
+    });
   }
 };
 
@@ -418,6 +433,20 @@ const completeBooking = async (req, res) => {
   }
 };
 
+const addPrescription = async (req, res) => {
+  try {
+    const { bookingId, prescription } = req.body;
+    await slotBookingModel.findByIdAndUpdate(bookingId, { 
+      prescription: prescription,
+      status: "Completed" 
+    });
+    res.status(200).json({ success: true, message: "Prescription saved and encounter sealed" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
 module.exports = {
   doctorGetOtp,
   submitOtp,
@@ -435,5 +464,6 @@ module.exports = {
   userBookedSlot,
   getActiveBookingDetails,
   getPlanChatUser,
-  completeBooking
+  completeBooking,
+  addPrescription
 };

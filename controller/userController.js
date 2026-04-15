@@ -313,10 +313,13 @@ const razorVerifySlotPayment = async (req, res, next) => {
 const getUserBookingData = async (req, res, next) => {
   try {
     let userId = req.userId;
-    let bookingData = await slotBookingModel.find({ UserId: userId });
+    let bookingData = await slotBookingModel.find({ UserId: userId })
+                                            .populate('DoctorId')
+                                            .sort({ created: -1 });
     res.status(200).json({ message: "successfully get data", success: true, bookingData });
-  } catch {
-    res.json({ message: "Something went wrong", success: false });
+  } catch (err) {
+    console.error("getUserBookingData Error:", err);
+    res.json({ message: "Something went wrong", success: false, error: err.message });
   }
 };
 
@@ -406,7 +409,7 @@ const updateHealthStats = async (req, res, next) => {
 const editUserProfile = async (req, res, next) => {
   try {
     let userId = req.userId;
-    const image = req.file.path.replace("public", "");
+    const image = req.file.path;
     let { name } = req.body;
     let editedData = await userModel.findByIdAndUpdate(
       { _id: userId },

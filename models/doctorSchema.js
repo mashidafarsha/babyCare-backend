@@ -31,6 +31,18 @@ const DoctorSchema = new mongoose.Schema({
     type: String,
     // required: true
   },
+  experience: {
+    type: String,
+    // required: true
+  },
+  about: {
+    type: String,
+    // required: true
+  },
+  address: {
+    type: String,
+    // required: true
+  },
   consultationFee: {
     type: Number,
     // required: true

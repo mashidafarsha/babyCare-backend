@@ -16,8 +16,8 @@ const {
   userBookedSlot,
   getActiveBookingDetails,
   getPlanChatUser,
-  completeBooking
-
+  completeBooking,
+  addPrescription
 } = require("../controller/doctorController");
 const {addMessage,getAllMessage}=require("../controller/messageController")
 const { verifyDoctorLogin } = require("../middleware/doctorAuth");
@@ -36,7 +36,7 @@ router.get("/getReason", verifyDoctorLogin, getRejReason);
 router.post(
   "/editDoctor",
   verifyDoctorLogin,
-  uploadImage.single("Image"),
+  uploadImage.single("image"),
   editDoctorProfile
 );
 router.post("/doctorSelectSlot", verifyDoctorLogin, docorSelSlots);
@@ -53,5 +53,6 @@ router.post('/getAllMessage',verifyDoctorLogin,getAllMessage)
 // EHR Routes
 router.post("/generatePrescription", verifyDoctorLogin, generatePrescription);
 router.put("/completeBooking/:bookingId", verifyDoctorLogin, completeBooking);
+router.put("/add-prescription", verifyDoctorLogin, addPrescription);
 router.get("/getDoctorReviews/:doctorId", getDoctorReviews);
 module.exports = router;

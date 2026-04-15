@@ -1,5 +1,6 @@
 const MedicalRecord = require("../models/medicalRecordSchema");
 const Prescription = require("../models/prescriptionSchema");
+const slotBookingModel = require("../models/slotBookingSchema");
 
 // --- User: Upload Medical Record ---
 const uploadMedicalRecord = async (req, res) => {
@@ -57,7 +58,32 @@ const generatePrescription = async (req, res) => {
     });
 
     await newPrescription.save();
-    res.status(201).json({ message: "Prescription generated successfully", prescription: newPrescription });
+
+    // Map medicines into string for User Profile
+    const mappedPrescription = medicines.map(m => `- ${m.name} (${m.dosage}): ${m.frequency} for ${m.duration}`).join('\n') + (notes ? `\n\nNotes:\n${notes}` : '');
+
+    // Now update the most recent active appointment for this user and doctor
+    console.log("Searching for latest booking for UserId:", userId, "DoctorId:", doctorId);
+    const latestBooking = await slotBookingModel.findOne({ UserId: userId, DoctorId: doctorId, status: "Active" }).sort({ created: -1 });
+    if(latestBooking) {
+      console.log("Found Active Booking, updating prescription!", latestBooking._id);
+      latestBooking.prescription = mappedPrescription;
+      latestBooking.status = "Completed";
+      await latestBooking.save();
+    } else {
+      console.log("No active booking found. Searching for ANY booking.");
+      // If no active, just attach to nearest regardless of status
+      const anyBooking = await slotBookingModel.findOne({ UserId: userId, DoctorId: doctorId }).sort({ created: -1 });
+      if (anyBooking) {
+         console.log("Found Nearest Booking, updating prescription!", anyBooking._id);
+         anyBooking.prescription = mappedPrescription;
+         await anyBooking.save();
+      } else {
+         console.log("No Booking found AT ALL between Doctor and User.");
+      }
+    }
+
+    res.status(201).json({ message: "Prescription generated successfully and linked to encounter", prescription: newPrescription });
   } catch (error) {
     console.log(error);
     res.status(500).json({ error: "Internal Server Error" });
